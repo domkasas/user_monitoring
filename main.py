@@ -36,7 +36,7 @@ if __name__ == '__main__':
             cv2.imwrite(filename, frame)
             locker.lockDevice()
             locker.frame_saved = True
-            subprocess.run(['/bin/python3', '/home/domkas/Desktop/senas/user_monitoring/detect.py', '--image', filename])
+            subprocess.run(['python3', 'detect.py', '--image', filename])
             
         # Hit 'q' on the keyboard to quit!
         if cv2.waitKey(1) & 0xFF == ord('q'):
