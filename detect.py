@@ -1,8 +1,7 @@
-#A Gender and Age Detection program by Mahesh Sawant
-
 import cv2
 import math
 import argparse
+from datetime import datetime
 
 def highlightFace(net, frame, conf_threshold=0.7):
     frameOpencvDnn=frame.copy()
@@ -74,4 +73,13 @@ while cv2.waitKey(1)<0 :
         print(f'Age: {age[1:-1]} years')
 
         cv2.putText(resultImg, f'{gender}, {age}', (faceBox[0], faceBox[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,255), 2, cv2.LINE_AA)
-        cv2.imshow("Detecting age and gender", resultImg)
+        
+        # Generate the filename with current date and time
+        now = datetime.now()
+        dt_string = now.strftime("%Y-%m-%d_%H.%M.%S")
+        filename = f'unauthorised/features/{dt_string}.jpg'
+        
+        # Save the image
+        cv2.imwrite(filename, resultImg)
+
+

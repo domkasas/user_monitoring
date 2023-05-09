@@ -2,7 +2,8 @@ from faceDetection import MPFaceDetection
 from faceNet.faceNet import FaceNet
 from locker import Locker
 import datetime
-
+#import detect
+import subprocess
 import cv2
 
 locker = Locker()
@@ -31,10 +32,11 @@ if __name__ == '__main__':
             # save last frame
             print("Saving last frame")
             current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
-            filename = f"unauthorised/{current_time}.jpg"
+            filename = f"unauthorised/captured/{current_time}.jpg"
             cv2.imwrite(filename, frame)
             locker.lockDevice()
             locker.frame_saved = True
+            subprocess.run(['/bin/python3', '/home/domkas/Desktop/senas/user_monitoring/detect.py', '--image', filename])
             
         # Hit 'q' on the keyboard to quit!
         if cv2.waitKey(1) & 0xFF == ord('q'):
