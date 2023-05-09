@@ -1,34 +1,46 @@
-import argparse
-import threading
-from utils import FPSmetric
-from engine import Engine
 from faceDetection import MPFaceDetection
 from faceNet.faceNet import FaceNet
 from locker import Locker
+import datetime
 
-def update_show(engine):
-    while True:
-        input_str = input('Enter "s" to toggle camera feed on/off: ')
-        if input_str.lower() == 's':
-            engine.show = not engine.show
+import cv2
+
+locker = Locker()
+facenet = FaceNet(
+    detector=MPFaceDetection(),
+    onnx_model_path="models/faceNet.onnx",
+    anchors="faces",
+    threshold=0.3,
+    force_cpu=True,
+)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--show', default=False, type=bool, help='Show camera feed')
-    args = parser.parse_args()
+    cap = cv2.VideoCapture(0)
+    while cap.isOpened():
+        success, frame = cap.read()
+        if not success or frame is None:
+            print("Ignoring empty camera frame.")
+            continue
 
-    facenet = FaceNet(
-        locker=Locker(),
-        detector=MPFaceDetection(),
-        onnx_model_path="models/faceNet.onnx",
-        anchors="faces",
-        threshold=0.3,
-        force_cpu=True,
-    )
-    engine = Engine(webcam_id=0, show=args.show, custom_objects=[facenet, FPSmetric()])
+        frame, face_crops = facenet(frame, draw=True)
 
-    show_thread = threading.Thread(target=update_show, args=(engine,))
-    show_thread.daemon = True
-    show_thread.start()
+        cv2.imshow('Video', frame)
 
-    engine.run()
+        locker.onFaceNetPipeline(face_crops)
+        if locker.deviceLocked and not locker.frame_saved:
+            # save last frame
+            print("Saving last frame")
+            current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
+            filename = f"unauthorised/{current_time}.jpg"
+            cv2.imwrite(filename, frame)
+            locker.lockDevice()
+            locker.frame_saved = True
+            
+        # Hit 'q' on the keyboard to quit!
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            print("Quitting")
+            cv2.destroyAllWindows()
+            break
+        
+    cap.release()
+

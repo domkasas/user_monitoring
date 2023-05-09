@@ -7,6 +7,7 @@ engine = Engine()
 
 class Locker:
     def __init__(self):
+        self.frame_saved = False
         self.noRecognizedFacesFrom = None
         self.isRecognizedFacesFrom = None
         self.deviceLocked = False
@@ -68,9 +69,7 @@ class Locker:
     def lockDevice(self):
         print("Locking user screen")
         self.deviceLocked = True
-        #pause
-        #capture
-        #unpause
+        #self.frame_saved = True
         #engine.capture_webcam(save_dir="unauthorized/")
         #os.system('gnome-screensaver-command -l')
 
@@ -82,4 +81,5 @@ class Locker:
     def unlockDevice(self):
         print("Unlocking user screen")
         self.deviceLocked = False
+        self.frame_saved = False
         #self.screenSaverSetActive(False)
